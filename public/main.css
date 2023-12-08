@@ -1,0 +1,19 @@
+.test{
+  background: red;
+}
+
+.row, .col {
+    min-height: 70px;
+}
+
+.gjs-row{
+    display: flex !important;
+}
+
+.gjs-cell{
+    padding: 4px;
+    height: auto !important;
+    min-height: 72px;
+    width: 100% !important;
+    display: block !important;
+}

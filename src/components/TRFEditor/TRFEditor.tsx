@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Basics from "grapesjs-blocks-basic";
-import { Editor } from "grapesjs";
-import { GrapesjsReact } from "grapesjs-react";
+import grapesjs, { Editor, ProjectData } from "grapesjs";
+import GjsEditor from '@grapesjs/react';
 import ClayLayout from "@clayui/layout";
 import { ClayInput } from "@clayui/form";
 import ClayPanel from "@clayui/panel";
@@ -12,20 +12,17 @@ import Server from "../../utilities/Server";
 
 //Styles imports
 // import "./PageEditor.scss";
-// import 'grapesjs/dist/css/grapes.min.css';
-// import "@base22/dx-micro-interaction-components/dist/cjs/index.css";
-// import "public/design_system_styles.css";
-
+import 'grapesjs/dist/css/grapes.min.css';
+import "@base22/dx-micro-interaction-components/dist/cjs/index.css";
 
 export const TRFEditor = ( props: any ) => {
-
   const [editor, setEditor] = useState<Editor | undefined>( undefined );
   const [pageName, setPageName] = useState( "" );
   const [pageSlug, setPageSlug] = useState( "" );
   const [pageStructure, setPageStructure ] = useState<any[]>( [] );
 
   const searchParams = props.pageId;
-  let slug: string | null = searchParams.get('id') || null;
+  let slug: string | null = searchParams || null;
 
   useEffect( ()=> {
     if( slug != null ){
@@ -121,45 +118,62 @@ export const TRFEditor = ( props: any ) => {
 
       {
         ( (slug && pageStructure.length ) || !slug ) &&
-        <GrapesjsReact
-          id='grapesjs-react'
-          storageManager={false}
-          plugins={[
-            Basics,
-            BaseReactComponent,
-            TerraformModule,
-          ]}
-          canvas={{
-            styles: [
-                "TRFStyles.css",
-                "/design_system_styles.css",
-                "main.css",
-                "coolicons.css"
-              ]
-          }}
-          onInit={( editor: Editor ) => {
+        <GjsEditor
+            grapesjs={grapesjs}
+            options={{
+                height: "100vh",
+                storageManager: false,
+                canvas: {
+                    styles: [
+                        "TRFStyles.css",
+                        "design_system_styles.css",
+                        "main.css",
+                        "coolicons.css"
+                    ]
+                },
 
-            //Storing GrapesJs instance
-            setEditor( editor );
+            }}
+            plugins={[
+                Basics,
+                BaseReactComponent,
+                TerraformModule
+            ]}
+            onEditor={( editor: Editor ) => {
+                //Storing GrapesJs instance
+                setEditor( editor );
 
-            //Create custrom traits
-            for (const [TraitName, TraitConfig] of Object.entries( CustomTraits ) ) {
-              editor.TraitManager.addType( TraitName, TraitConfig);
-            }
-            if( pageStructure ){
-              pageStructure.forEach( ( item: any )=>{
-                editor.addComponents(
-                  {
-                    type: item.type,
-                    attributes: item.attributes
-                  }
-                )
-              })
-            }
+                //
+                editor.TraitManager.addType("serverInstance",{
+                    noLabel: true,
+                    onUpdate({ trait }){
+                        console.log("UPDATED")
+                        trait.setValue( "TEST!" );
+                    },
+                    createInput({ trait }){
+                        console.log( trait.getValue() );
+                        trait.setValue( "TEST!" );
+                        console.log( trait.getValue() );
+                        return document.createElement("div");
+                    }
+                })
 
-          }}
-
-        ></GrapesjsReact>}
+                //Create custrom traits
+                for (const [TraitName, TraitConfig] of Object.entries( CustomTraits ) ) {
+                    editor.TraitManager.addType( TraitName, TraitConfig);
+                }
+                if( pageStructure ){
+                    pageStructure.forEach( ( item: any )=>{
+                    editor.addComponents(
+                        {
+                            type: item.type,
+                            attributes: item.attributes
+                        }
+                    )
+                    })
+                }
+            }}
+        ></GjsEditor>
+        }
     </div>
   );
 };

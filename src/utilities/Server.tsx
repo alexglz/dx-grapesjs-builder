@@ -1,3 +1,7 @@
+export interface ServerInterface {
+    getIds: ( componentType: string) => Promise<{id: string, label: string}[]>;
+}
+
 
 class Server {
     static async getIds( componentType: string): Promise<{id: string, label: string}[]>{
