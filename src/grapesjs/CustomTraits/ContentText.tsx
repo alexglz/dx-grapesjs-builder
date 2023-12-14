@@ -1,4 +1,4 @@
-import Server from "../../utilities/Server";
+import Server from "../../utilities/ServerInterface";
 import { CustomTrait } from "grapesjs";
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -27,8 +27,9 @@ const ContentText: CustomTrait<{}> = {
     },
 
     onEvent({ elInput, component, trait}) {
+        //@ts-ignore: component.server does exist
+        const Server = component.server as ServerInterface;
         let traitName = trait.get("name") || "undefined";
-
         const myInput: HTMLInputElement = elInput.querySelector('.contentText') || new HTMLInputElement;
         let value =  "";
         if( myInput.value && traitName ){

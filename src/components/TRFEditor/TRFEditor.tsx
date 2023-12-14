@@ -8,25 +8,32 @@ import ClayPanel from "@clayui/panel";
 import TerraformModule from "../../grapesjs/GrapesJsPlugins/TerraformModule";
 import BaseReactComponent from "../../grapesjs/GrapesJsPlugins/base-react-component";
 import CustomTraits from "../../grapesjs/CustomTraits";
-import Server from "../../utilities/Server";
+import { ServerInterface } from "../../utilities/ServerInterface";
 
 //Styles imports
 // import "./PageEditor.scss";
 import 'grapesjs/dist/css/grapes.min.css';
 import "@base22/dx-micro-interaction-components/dist/cjs/index.css";
+import './TRFEditor.scss'
 
-export const TRFEditor = ( props: any ) => {
-  const [editor, setEditor] = useState<Editor | undefined>( undefined );
-  const [pageName, setPageName] = useState( "" );
-  const [pageSlug, setPageSlug] = useState( "" );
-  const [pageStructure, setPageStructure ] = useState<any[]>( [] );
+export interface TRFEditorProps {
+    server: ServerInterface;
+    pageId?: string;
+}
 
-  const searchParams = props.pageId;
-  let slug: string | null = searchParams || null;
+export const TRFEditor = ( props: TRFEditorProps ) => {
+
+    const [editor, setEditor] = useState<Editor | undefined>( undefined );
+    const [pageName, setPageName] = useState( "" );
+    const [pageSlug, setPageSlug] = useState( "" );
+    const [pageStructure, setPageStructure ] = useState<any[]>( [] );
+
+    const searchParams = props.pageId;
+    let slug: string | null = searchParams || null;
 
   useEffect( ()=> {
     if( slug != null ){
-      Server.getPage( slug ).then( ( data: any )=>{
+      props.server.getPage( slug ).then( ( data: any )=>{
         setPageStructure( data.pageStructure );
         setPageName(data.pageName);
         setPageSlug( slug! );
@@ -63,12 +70,12 @@ export const TRFEditor = ( props: any ) => {
     const components: Object[] = JSON.parse( data );
     let componentsTree = getTree( components );
 
-    Server.savePage(pageName, pageSlug, componentsTree);
+    props.server.savePage(pageName, pageSlug, componentsTree);
 
   };
 
   return (
-    <div>
+    <div className="trfEditor">
       <div className="Header" style={{ padding: "1rem 2rem 1rem 2rem" }}>
         <h2> Page Editor </h2>
         <ClayPanel
@@ -131,7 +138,10 @@ export const TRFEditor = ( props: any ) => {
                         "coolicons.css"
                     ]
                 },
-
+                pluginsOpts:{
+                    //@ts-ignore: TypeScript incorrectly flags this line as a bug
+                    [TerraformModule]: { "server": props.server }
+                }
             }}
             plugins={[
                 Basics,
@@ -141,21 +151,6 @@ export const TRFEditor = ( props: any ) => {
             onEditor={( editor: Editor ) => {
                 //Storing GrapesJs instance
                 setEditor( editor );
-
-                //
-                editor.TraitManager.addType("serverInstance",{
-                    noLabel: true,
-                    onUpdate({ trait }){
-                        console.log("UPDATED")
-                        trait.setValue( "TEST!" );
-                    },
-                    createInput({ trait }){
-                        console.log( trait.getValue() );
-                        trait.setValue( "TEST!" );
-                        console.log( trait.getValue() );
-                        return document.createElement("div");
-                    }
-                })
 
                 //Create custrom traits
                 for (const [TraitName, TraitConfig] of Object.entries( CustomTraits ) ) {

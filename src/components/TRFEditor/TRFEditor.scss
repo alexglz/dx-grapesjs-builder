@@ -1,0 +1,24 @@
+.trfEditor{
+    width: 100%;
+}
+
+
+.traitDivider{
+  &__label{
+    font-weight: bold;
+  }
+
+  &__divider{
+    background-color: white;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+.contentInput{
+
+  &:disabled{
+    background-color: gray;
+    opacity: 0.5;
+  }
+}

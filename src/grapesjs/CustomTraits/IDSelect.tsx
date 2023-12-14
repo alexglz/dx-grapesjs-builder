@@ -1,5 +1,5 @@
 import { CustomTrait, Trait } from "grapesjs";
-import Server from "../../utilities/Server";
+import Server, { ServerInterface } from "../../utilities/ServerInterface";
 
 const IDSelect: CustomTrait<{}> = {
     onUpdate( { trait, elInput } ){
@@ -34,28 +34,30 @@ const IDSelect: CustomTrait<{}> = {
       return el;
     },
     onEvent( { elInput, component, trait } ) {
-      let traitName = trait.get("name") || "undefined";
-      const idSelect = elInput.querySelector( ".idSelect" ) as HTMLSelectElement;
-      if(idSelect.value){
+        //@ts-ignore: component.server does exist
+        const Server = component.server as ServerInterface;
+        let traitName = trait.get("name") || "undefined";
+        const idSelect = elInput.querySelector( ".idSelect" ) as HTMLSelectElement;
+        if(idSelect.value){
 
-        Server.getContent(idSelect.value).then( (data: any) =>{
-          console.log("DATA", data)
-          component.addAttributes( {
-            data,
-            [traitName]: idSelect.value
-          } )
+            Server.getContent(idSelect.value).then( (data: any) =>{
+            console.log("DATA", data)
+            component.addAttributes( {
+                data,
+                [traitName]: idSelect.value
+            } )
 
-          trait.setValue( idSelect.value )
+            trait.setValue( idSelect.value )
 
-          let allTraits: Trait[] = component.getTraits() || [];
-          allTraits.forEach( (trait: Trait) => {
-            if( trait.attributes.name && trait.attributes.type?.indexOf("Content") != -1 ){
-              component.updateTrait( trait.attributes.name, {
-                value: data[ trait.attributes.name ] || "",
-                type: trait.attributes.type
-              })
-            }
-          })
+            let allTraits: Trait[] = component.getTraits() || [];
+            allTraits.forEach( (trait: Trait) => {
+                if( trait.attributes.name && trait.attributes.type?.indexOf("Content") != -1 ){
+                component.updateTrait( trait.attributes.name, {
+                    value: data[ trait.attributes.name ] || "",
+                    type: trait.attributes.type
+                })
+                }
+            })
 
         })
 

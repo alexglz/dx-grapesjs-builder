@@ -1,11 +1,11 @@
 import React, { ReactElement } from 'react';
 import { Editor } from 'grapesjs';
 import TRFExports from "../CustomComponents/TerraformComponents/index";
-import Server from '../../utilities/Server';
+import Server, { ServerInterface } from '../../utilities/ServerInterface';
 import "@base22/dx-micro-interaction-components/dist/cjs/index.css";
 
 
-export  const TerraformModule = ( editor: Editor ) => {
+export  const TerraformModule = ( editor: Editor, options: any ) => {
     const { Blocks, Components } = editor;
 
     //@ts-ignore
@@ -14,33 +14,28 @@ export  const TerraformModule = ( editor: Editor ) => {
         {
             extend: 'react-component',
             model: {
+                server: options.server,
                 init(){
-                    console.log( "GG" );
-                    this.addTrait(["serverInstance", {
-                        name: "serverInstance",
-                        type: "serverInstance"
-                    } ])
-                    this.updateTrait("serverInstance", { type: "serverInstance", value:"test" })
-                    console.log ( this.getTrait("serverInstance").getValue() )
                     this.loadContentIds();
-                        if( this.getAttributes()["contentId"] && !this.getAttributes()["data"] ){
-                            this.loadContentData();
-                        }
+                    if( this.getAttributes()["contentId"] && !this.getAttributes()["data"] ){
+                        this.loadContentData();
+                    }
                 },
                 loadContentData(){
-                    Server.getContent( this.getAttributes()["contentId"] ).then( ( data: any ) => {
-                        this.setAttributes( {...this.getAttributes() , ...data } )
+                    this.server.getContent( this.getAttributes()["contentId"] ).then( ( data: any ) => {
+                       this.setAttributes( {...this.getAttributes() , ...data } )
                     })
                 },
                 loadContentIds(){
+                    const server: ServerInterface = this.server;
                     const traits = this.get("traits");
                     const componentType = this.get("type");
                     if(componentType && traits?.get("contentId")){
-                        Server.getIds(componentType).then( data => {
-                        this.updateTrait("contentId", {
-                            type: "IDSelect",
-                            options: data
-                        } )
+                        server.getIds(componentType).then( data => {
+                            this.updateTrait("contentId", {
+                                type: "IDSelect",
+                                options: data
+                            } )
                         } )
                     }
 

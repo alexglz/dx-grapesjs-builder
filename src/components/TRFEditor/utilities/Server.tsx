@@ -1,10 +1,7 @@
-export interface ServerInterface {
-    getIds: ( componentType: string) => Promise<{id: string, label: string}[]>;
-}
+import { ServerInterface } from "../../../utilities";
 
-
-class Server {
-    static async getIds( componentType: string): Promise<{id: string, label: string}[]>{
+class Server implements ServerInterface {
+    async getIds( componentType: string): Promise<{id: string, label: string}[]>{
         //Simulating server response time
         await new Promise(resolve => setTimeout( resolve, 500 ));
         return new Promise( (resolve, reject) => {
@@ -19,7 +16,7 @@ class Server {
         })
     }
 
-    static async getContent( id: string ){
+    async getContent( id: string ){
         //Simulating server response time
         await new Promise(resolve => setTimeout( resolve, 500 ));
         return new Promise( (resolve, reject) => {
@@ -89,22 +86,22 @@ class Server {
         })
     }
 
-    static async savePage( pageName: string, pageSlug: string, pageStructure: any){
-        return new Promise((resolve, reject) => {
+    async savePage( pageName: string, pageSlug: string, pageStructure: any){
+        return new Promise<boolean>((resolve, reject) => {
             localStorage.setItem(pageSlug, JSON.stringify({ pageName, pageStructure }))
             resolve( true );
         })
     }
 
-    static async getPage( id: string ){
+    async getPage( id: string ){
         return new Promise((resolve, reject) => {
             let pageStructure = JSON.parse( localStorage.getItem(id) || "" );
             resolve( pageStructure );
         })
     }
 
-    static async updateContent( id: string, data: any ){
-        return new Promise((resolve, reject) => {
+    async updateContent( id: string, data: any ){
+        return new Promise<boolean>((resolve, reject) => {
            resolve(true)
         })
     }
